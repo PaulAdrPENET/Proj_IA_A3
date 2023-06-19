@@ -4,8 +4,8 @@ from collections import Counter
 
 #Préparation des données Paul-Adrien PENET.
 
-
-def rewrite_data(data):
+def rewrite_data():
+    data = pd.read_csv('data.csv')
     types = data.dtypes
     # print(types)
     # On remarque que les dates sont au format object, et les numéros des départements au format object également.
@@ -23,10 +23,10 @@ def rewrite_data(data):
     # On corrige la valeur de l'âge (en diminuant tout par 14 ans) :
     data['age'] = data['age'] - 14
     # print(data['age'].mean())
+    return data
+
 
 # Préparation Gabriel Lefèvre
-
-
 """
 print(data['descr_grav'])
 cath_quali = [data['descr_cat_veh'], data['descr_agglo'],
