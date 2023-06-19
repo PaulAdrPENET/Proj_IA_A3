@@ -22,3 +22,4 @@ print(data.isnull().any())
 # On corrige la valeur de l'âge (en diminuant tout par 14 ans) :
 data['age'] = data['age'] - 14
 print(data['age'].mean())
+
