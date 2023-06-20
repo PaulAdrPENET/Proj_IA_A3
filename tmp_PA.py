@@ -1,10 +1,9 @@
 import pandas as pd
-
 from Preparation import *
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, LeaveOneOut
-
+from sklearn.linear_model import LogisticRegression
 data = rewrite_data()
 
 """ Réduction des dimensions Paul-Adrien PENET
@@ -80,7 +79,11 @@ data_reduc_dim = reduction_dim(data)
 data_ready = reduction_data(data_reduc_dim)
 print(data_ready)
 X, y = repartition_data(data_ready)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=15)
+#On choisit une valeur aléatoire pour random_state.
+model_holdout = LogisticRegression(max_iter=1500)
+model_holdout.fit(X_train, y_train)
+
 
 #Holdout:
 
