@@ -65,6 +65,7 @@ def reduction_data(data):
     return data_filtre
 # Cependant les données étant regroupées par description grave, il faut les mélanger.
 
+
 data_reduc_dim = reduction_dim(data)
 print(data_reduc_dim)
 data_ready = reduction_data(data_reduc_dim)
