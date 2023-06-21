@@ -4,6 +4,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, LeaveOneOut
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
 data = rewrite_data()
 
 """ Réduction des dimensions Paul-Adrien PENET
@@ -79,10 +82,51 @@ data_reduc_dim = reduction_dim(data)
 data_ready = reduction_data(data_reduc_dim)
 print(data_ready)
 X, y = repartition_data(data_ready)
+#X = data_reduc_dim
+#y = data_reduc_dim['descr_grav']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=15)
 #On choisit une valeur aléatoire pour random_state.
-model_holdout = LogisticRegression(max_iter=1500)
-model_holdout.fit(X_train, y_train)
+#Holdout :
 
-#Holdout:
+holdout = LogisticRegression(max_iter=20000)
+holdout.fit(X_train, y_train)
+
+#On calcule les scores d'apprentissage et de test
+holdout_train_score = holdout.score(X_train, y_train)
+holdout_test_score = holdout.score(X_test, y_test)
+
+print("------Holdout-----")
+print("Score apprentissage :", np.mean(holdout_train_score))
+print("Score de test :", np.mean(holdout_test_score))
+
+#LeaveOneOut :
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+LeaveOO = LeaveOneOut()
+
+train_scores = []
+test_scores = []
+
+for train_index, test_index in LeaveOO.split(X):
+    X_train = X_scaled[train_index]
+    X_test = X_scaled[test_index]
+    y_train = y.iloc[train_index]
+    y_test = y.iloc[test_index]
+
+    loo = LogisticRegression(max_iter=20000)
+    loo.fit(X_train, y_train)
+
+    train_score = loo.score(X_train, y_train)
+    test_score = loo.score(X_test, y_test)
+
+    train_scores.append(train_score)
+    test_scores.append(test_score)
+
+print("------LeaveOneOut-----")
+print("score apprentissage :", np.mean(train_scores))
+print("score test :", np.mean(test_scores))
+
+
 
