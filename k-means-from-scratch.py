@@ -126,9 +126,9 @@ def aff_k_means_from_scratch(data, nb_ofcluster):
     # Ajout des centroïdes à la carte
     lat_ofcentroids, lon_ofcentroids = zip(*coord_centroids)
     fig.add_trace(go.Scattermapbox(lat=lat_ofcentroids, lon=lon_ofcentroids, mode='markers',
-                                   marker=dict(color='black', size=10)))
+                                   marker=dict(color='#00FF00', size=10)))
     fig.update_layout(title="Représentation des accidents de la route après clustering k-means from scratch")
     fig.show()
 
 
-aff_k_means_from_scratch(data_ready, 14)
+# aff_k_means_from_scratch(data_ready, 14)
