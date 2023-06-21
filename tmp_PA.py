@@ -41,7 +41,7 @@ def reduction_dim(data):
    data = data.drop("descr_motif_traj", axis=1)
    data = data.drop("description_intersection", axis=1)
    data = data.drop("descr_type_col", axis=1)
-   data = data.drop("descr_dispo_secu", axis=1)
+   data = data.drop("descr_lum", axis=1)
    data = data.drop("age", axis=1)
    data = data.drop("month", axis=1)
    #On supprime également les colonnes non numériques n'apparaissant pas dans la matrice :
