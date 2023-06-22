@@ -160,4 +160,4 @@ def Courbe_ROC():
     plt.xlabel('Taux de faux positifs')
     plt.ylabel('Taux de vrais positifs')
     plt.title('Courbe ROC')
-    plt.show()
+    plt.show()#
