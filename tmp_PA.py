@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, LeaveOneOut
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import GridSearchCV
 import numpy as np
 
 data = rewrite_data()
@@ -70,8 +75,8 @@ def reduction_data(data):
 def repartition_data(data):
    #Dans la dataframe data_ready les données sont ordonnées à cause du groupby.
    #On répartit les données de façon aléatoire.
-   data_unsorted = data.sample(frac=1,random_state=1).reset_index(drop=True)
-   # Holdout
+   data_unsorted = data.sample(frac=1,random_state=0).reset_index(drop=True)
+   #Séparation des données.
    X = data_unsorted
    y = data['descr_grav']
    return X,y
@@ -84,20 +89,20 @@ print(data_ready)
 X, y = repartition_data(data_ready)
 #X = data_reduc_dim
 #y = data_reduc_dim['descr_grav']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=15)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 #On choisit une valeur aléatoire pour random_state.
 #Holdout :
 
-holdout = LogisticRegression(max_iter=20000)
-holdout.fit(X_train, y_train)
+ho = LogisticRegression(max_iter=1000)
+ho.fit(X_train, y_train)
 
 #On calcule les scores d'apprentissage et de test
-holdout_train_score = holdout.score(X_train, y_train)
-holdout_test_score = holdout.score(X_test, y_test)
+Ho_apprentissage_score = ho.score(X_train, y_train)
+HO_test_score = ho.score(X_test, y_test)
 
 print("------Holdout-----")
-print("Score apprentissage :", np.mean(holdout_train_score))
-print("Score de test :", np.mean(holdout_test_score))
+print("Score apprentissage :", np.mean(Ho_apprentissage_score))
+print("Score de test :", np.mean(HO_test_score))
 
 #LeaveOneOut :
 
@@ -115,7 +120,7 @@ for train_index, test_index in LeaveOO.split(X):
     y_train = y.iloc[train_index]
     y_test = y.iloc[test_index]
 
-    loo = LogisticRegression(max_iter=20000)
+    loo = LogisticRegression(max_iter=1000)
     loo.fit(X_train, y_train)
 
     train_score = loo.score(X_train, y_train)
@@ -128,5 +133,65 @@ print("------LeaveOneOut-----")
 print("score apprentissage :", np.mean(train_scores))
 print("score test :", np.mean(test_scores))
 
+#Classification avec trois algorithmes de "haut niveau" :
+
+#Support Vector Machine (SVM) :
+
+svm = SVC(kernel='linear', C=1.0)
+#On défini le paramètre de régularisation sur 1 comme point de départ
+#cette valeur peut être ajusté en fonction des résultats.
+X, y = repartition_data(data_ready)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+clf = SVC()
+clf.fit(X_train, y_train)
+#On crée une instance du modèle SVM puis on l'entraine.
+prediction = clf.predict(X_test)
+score_precision = accuracy_score(y_test, prediction)
+#On utilise gridSearch pour trouver les meilleurs hyper-paramètres :
+#Il existe plusieurs paramètres pour le SVM, le paramètre C permet de réduire le bruit dans les observations.
+
+parametre = { 'C': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]}
+grid_search_result = GridSearchCV(clf, parametre, scoring='accuracy')
+grid_search_result.fit(X_train, y_train)
+print('Grid search resultat pour le paramètre C')
+print(grid_search_result.cv_results_)
+best_params = grid_search_result.best_params_
+print('Meilleur paramètre', best_params)
+best_score = grid_search_result.best_score_
+print('Best score', best_score)
+print("------SVM------")
+print("Score précision :", score_precision)
+#Pour un score des scores d'apprentissages et de test ~ 0.26
+#On obtient un score de précision = 0.28375 (avant optimisation via gridsearch)
+
+#Ransom Forest :
+
+clf2 = RandomForestClassifier(n_estimators=100, random_state=0)
+clf2.fit(X_train, y_train)
+prediction = clf2.predict(X_test)
+score_precision = accuracy_score(y_test, prediction)
+#On utilise gridSearch pour trouver les meilleurs hyper-paramètres :
+#parametre = {'n_estimators':[100, 200, 300]} # par défaut le nombre de n_estimators est égale à 100.
+#grid_search_result = GridSearchCV(param_grid=parametre)
+#grid_search_result.fit(X_train, y_train)
+#print('Grid search résultat pour le paramètre n_estimators :')
+#print(grid_search_result.cv_results_)
+#print('Meilleur paramètre', grid_search_result.best_params_)
+
+print("-------Random Forest------")
+print("score précision :", score_precision)
+#Pour un score des scores d'apprentissages et de test ~ 0.26
+#On obtient un score de précision = 0.22 (avant optimisation via gridsearch)
 
 
+#Multilayer Perceptron (MLP) :
+
+mlp = MLPClassifier(hidden_layer_sizes=(100,), activation='relu', solver='adam', random_state=0)
+mlp.fit(X_train, y_train)
+y_pred = mlp.predict(X_test)
+score_precision = accuracy_score(y_test, y_pred)
+
+print("-------Multilayer Perceptron------")
+print("score précision :", score_precision)
+#Pour un score des scores d'apprentissages et de test ~ 0.26
+#On obtient un score de précision = 0.265 (avant optimisation via gridsearch)
