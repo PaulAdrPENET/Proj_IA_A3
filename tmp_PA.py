@@ -13,6 +13,7 @@ from sklearn.model_selection import GridSearchCV
 import numpy as np
 from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import cross_val_score
+import json
 
 data = rewrite_data()
 
@@ -81,11 +82,20 @@ def reduction_data(data):
 def repartition_data(data):
     # Dans la dataframe data_ready les données sont ordonnées à cause du groupby.
     # On répartit les données de façon aléatoire.
+    data = data()
     data_unsorted = data.sample(frac=1, random_state=0).reset_index(drop=True)
     # Séparation des données.
     X = data_unsorted
     y = data['descr_grav']
     return X, y
+
+# Interface des autres fonctions de préparation des données.
+def data():
+    data = rewrite_data()
+    data_reduc_dim = reduction_dim(data)
+    data_ready = reduction_data(data_reduc_dim)
+    return data_ready
+
 
 data_reduc_dim = reduction_dim(data)
 # print(data_reduc_dim)
@@ -148,7 +158,45 @@ print("score test :", np.mean(test_scores))
 
 # Classification avec trois algorithmes de "haut niveau" :
 
-""" Support Vector Machine (SVM) : Paul-Adrien PENET
+def classification(type_methode,accident_info):
+
+    X, y = repartition_data()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    #SVM :
+    if type_methode == 0:
+        clf = SVC(C=0.1)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(accident_info)
+        resultat = {
+            "SVM": predictions.tolist()
+        }
+
+    #Random Forest :
+    elif type_methode == 1:
+        clf = RandomForestClassifier(n_estimators=100, random_state=0)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(accident_info)
+        resultat = {
+            "Random Forest": predictions.tolist()
+        }
+
+    #MLP :
+    elif type_methode == 2:
+        clf = MLPClassifier(random_state=0)  # Paramètres au choix
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(accident_info)
+        resultat = {
+            "Multiplayer Perceptron": predictions.tolist()
+        }
+
+    fichier_json = json.dumps(resultat)
+    print(fichier_json)
+
+    return fichier_json
+
+# Evaluation quantitative des résultats "supervisé" : Taux d'apprentissage :
+
+""" Support Vector Machine (SVM) : Paul-Adrien PENET 
 """
 def classification_SVM():
     # On défini le paramètre de régularisation sur 1 comme point de départ
