@@ -77,18 +77,6 @@ def reduction_data(data):
     # print(data_filtre)
     return data_filtre
 
-""" Repartition data Paul-Adrien PENET
-"""
-def repartition_data(data):
-    # Dans la dataframe data_ready les données sont ordonnées à cause du groupby.
-    # On répartit les données de façon aléatoire.
-    data = data()
-    data_unsorted = data.sample(frac=1, random_state=0).reset_index(drop=True)
-    # Séparation des données.
-    X = data_unsorted
-    y = data['descr_grav']
-    return X, y
-
 # Interface des autres fonctions de préparation des données.
 def data():
     data = rewrite_data()
@@ -96,12 +84,24 @@ def data():
     data_ready = reduction_data(data_reduc_dim)
     return data_ready
 
+""" Repartition data Paul-Adrien PENET
+"""
+def repartition_data(data):
+    # Dans la dataframe data_ready les données sont ordonnées à cause du groupby.
+    # On répartit les données de façon aléatoire.
+    #data = data()
+    data_unsorted = data.sample(frac=1, random_state=0).reset_index(drop=True)
+    # Séparation des données.
+    X = data_unsorted
+    y = data['descr_grav']
+    return X, y
 
-data_reduc_dim = reduction_dim(data)
+
+# data_reduc_dim = reduction_dim(data)
 # print(data_reduc_dim)
-data_ready = reduction_data(data_reduc_dim)
-print(data_ready)
-X, y = repartition_data(data_ready)
+# data_ready = reduction_data(data_reduc_dim)
+# print(data_ready)
+X, y = repartition_data(data())
 # X = data_reduc_dim -> caractéristique
 # y = data_reduc_dim['descr_grav'] -> variable cible
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
@@ -158,15 +158,21 @@ print("score test :", np.mean(test_scores))
 
 # Classification avec trois algorithmes de "haut niveau" :
 
+""" Classification : Paul-Adrien PENET
+"""
 def classification(type_methode,accident_info):
 
-    X, y = repartition_data()
+    #accident_info = json.loads(accident_info)
+    accident_info_list = list(accident_info.values())
+    print(accident_info_list)
+
+    X, y = repartition_data(data())
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
     #SVM :
     if type_methode == 0:
         clf = SVC(C=0.1)
         clf.fit(X_train, y_train)
-        predictions = clf.predict(accident_info)
+        predictions = clf.predict([accident_info_list])
         resultat = {
             "SVM": predictions.tolist()
         }
@@ -175,7 +181,7 @@ def classification(type_methode,accident_info):
     elif type_methode == 1:
         clf = RandomForestClassifier(n_estimators=100, random_state=0)
         clf.fit(X_train, y_train)
-        predictions = clf.predict(accident_info)
+        predictions = clf.predict([accident_info_list])
         resultat = {
             "Random Forest": predictions.tolist()
         }
@@ -184,7 +190,7 @@ def classification(type_methode,accident_info):
     elif type_methode == 2:
         clf = MLPClassifier(random_state=0)  # Paramètres au choix
         clf.fit(X_train, y_train)
-        predictions = clf.predict(accident_info)
+        predictions = clf.predict([accident_info_list])
         resultat = {
             "Multiplayer Perceptron": predictions.tolist()
         }
@@ -219,14 +225,8 @@ def classification_SVM():
     # print('Best score', best_score)
     return score_precision
 
-X, y = repartition_data(data_ready)
+X, y = repartition_data(data())
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-
-score_precision = classification_SVM()
-print("------SVM------")
-print("Score précision :", score_precision)
-# Pour un score des scores d'apprentissages et de test ~ 0.26
-# On obtient un score de précision = 0.28375 (avant optimisation via gridsearch)
 
 """ Random Forest : Paul-Adrien PENET
 """
@@ -244,12 +244,6 @@ def classification_Random_Forest():
     # print('Meilleur paramètre', grid_search_result.best_params_)
     return score_precision
 
-score_precision = classification_Random_Forest()
-print("-------Random Forest------")
-print("score précision :", score_precision)
-# Pour un score des scores d'apprentissages et de test ~ 0.26
-# On obtient un score de précision = 0.22 (avant optimisation via gridsearch)
-
 """ Multilayer Perceptron (MLP) : Paul-Adrien PENET
 """
 def classification_MLP():
@@ -266,34 +260,65 @@ def classification_MLP():
     # print('Meilleur paramètre', grid_search_result.best_params_)
     return score_precision
 
-score_precision = classification_MLP()
+""" Vote majoritaire : Paul-Adrien PENET
+"""
+def vote_majoritaire():
+    # On initialise les classifieurs :
+    svm = SVC()
+    rf = RandomForestClassifier(n_estimators=100, random_state=0)
+    mlp = MLPClassifier()
+
+    # On initialise le vote majoritaire :
+    vote = VotingClassifier(
+        estimators=[('svm', svm), ('rf', rf), ('mlp', mlp)],
+        voting='hard'
+    )
+
+    # On calcule et affiche les scores pour chaque classfieur :
+    scores_svm = cross_val_score(svm, X, y, scoring='accuracy', cv=5)
+    scores_rf = cross_val_score(rf, X, y, scoring='accuracy', cv=5)
+    scores_mlp = cross_val_score(mlp, X, y, scoring='accuracy', cv=5)
+    scores_vote = cross_val_score(vote, X, y, scoring='accuracy', cv=5)
+
+    # Affichage des scores
+    print("--------Vote Majoritaire--------")
+    print("Précision SVM: %0.3f (+/- %0.3f)" % (scores_svm.mean(), scores_svm.std()))
+    print("Précision Random Forest: %0.3f (+/- %0.3f)" % (scores_rf.mean(), scores_rf.std()))
+    print("Précision Multilayer Perceptron: %0.3f (+/- %0.3f)" % (scores_mlp.mean(), scores_mlp.std()))
+    print("Précision Ensemble: %0.3f (+/- %0.3f)" % (scores_vote.mean(), scores_vote.std()))
+    return
+
+# -------- TEST -------- :
+#score_precision = classification_SVM()
+print("------SVM------")
+#print("Score précision :", score_precision)
+# Pour un score des scores d'apprentissages et de test ~ 0.26
+# On obtient un score de précision = 0.28375 (avant optimisation via gridsearch)
+
+#score_precision = classification_Random_Forest()
+print("-------Random Forest------")
+#print("score précision :", score_precision)
+# Pour un score des scores d'apprentissages et de test ~ 0.26
+# On obtient un score de précision = 0.22 (avant optimisation via gridsearch)
+
+#score_precision = classification_MLP()
 print("-------Multilayer Perceptron------")
-print("score précision :", score_precision)
+#print("score précision :", score_precision)
 # Pour un score des scores d'apprentissages et de test ~ 0.26
 # On obtient un score de précision = 0.265 (avant optimisation via gridsearch)
 
-""" Vote majoritaire : Paul-Adrien PENET
-"""
-# On initialise les classifieurs :
-svm = SVC()
-rf = RandomForestClassifier(n_estimators=100, random_state=0)
-mlp = MLPClassifier()
+#vote_majoritaire()
 
-# On initialise le vote majoritaire :
-vote = VotingClassifier(
-    estimators=[('svm', svm), ('rf', rf), ('mlp', mlp)],
-    voting='hard'
-)
-
-# On calcule et affiche les scores pour chaque classfieur :
-scores_svm = cross_val_score(svm, X, y, scoring='accuracy', cv=5)
-scores_rf = cross_val_score(rf, X, y, scoring='accuracy', cv=5)
-scores_mlp = cross_val_score(mlp, X, y, scoring='accuracy', cv=5)
-scores_vote = cross_val_score(vote, X, y, scoring='accuracy', cv=5)
-
-# Affichage des scores
-print("--------Vote Majoritaire--------")
-print("Accuracy SVM: %0.3f (+/- %0.3f)" % (scores_svm.mean(), scores_svm.std()))
-print("Accuracy Random Forest: %0.3f (+/- %0.3f)" % (scores_rf.mean(), scores_rf.std()))
-print("Accuracy Multilayer Perceptron: %0.3f (+/- %0.3f)" % (scores_mlp.mean(), scores_mlp.std()))
-print("Accuracy Ensemble: %0.3f (+/- %0.3f)" % (scores_vote.mean(), scores_vote.std()))
+# Test de la classification :
+print(data())
+accident_info = {
+  "latitude": 48.8566,
+  "longitude": 2.3522,
+  "descr_cat_veh": 1,
+  "descr_lum": 1,
+  "descr_etat_surf": 1,
+  "descr_dispo_secu": 1,
+  "descr_grav": 0
+}
+prediction_gravite = classification(1, accident_info)
+print(prediction_gravite)
