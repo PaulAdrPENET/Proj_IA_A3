@@ -19,6 +19,7 @@ y_pred = inst_knn.predict(x_test)
 accuracy = accuracy_score(y_test, y_pred)
 # Affichage du résultat
 print("Précision : ", accuracy)
+#
 
 
 

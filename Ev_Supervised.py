@@ -76,3 +76,4 @@ matrix_ofconfusion = make_conf_matrix(y_test, pred)
 precision, rappel = calcul_precision(matrix_ofconfusion)
 print("Précision = ", precision)
 print("Rappel = ", rappel)
+#

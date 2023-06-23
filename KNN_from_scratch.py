@@ -89,3 +89,4 @@ y_pred = knn.classification_knn(x_test)
 # Calcul de l'exactitude (accuracy)
 accuracy = accuracy_score(y_test, y_pred)
 print("Précision:", accuracy)
+#

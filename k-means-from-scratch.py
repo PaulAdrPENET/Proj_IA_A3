@@ -127,3 +127,4 @@ kmeans = KMeansFromScratch(nb_of_clusters=9)
 kmeans.k_means_from_scratch(data_ready)
 # Utilisation de la méthode pour afficher le clustering sur une carte
 kmeans.aff_k_means_from_scratch(data_ready)
+#
