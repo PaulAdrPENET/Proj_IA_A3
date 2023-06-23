@@ -289,25 +289,25 @@ def vote_majoritaire():
     return
 
 # -------- TEST -------- :
-#score_precision = classification_SVM()
+score_precision = classification_SVM()
 print("------SVM------")
-#print("Score précision :", score_precision)
+print("Score précision :", score_precision)
 # Pour un score des scores d'apprentissages et de test ~ 0.26
 # On obtient un score de précision = 0.28375 (avant optimisation via gridsearch)
 
-#score_precision = classification_Random_Forest()
+score_precision = classification_Random_Forest()
 print("-------Random Forest------")
-#print("score précision :", score_precision)
+print("score précision :", score_precision)
 # Pour un score des scores d'apprentissages et de test ~ 0.26
 # On obtient un score de précision = 0.22 (avant optimisation via gridsearch)
 
-#score_precision = classification_MLP()
+score_precision = classification_MLP()
 print("-------Multilayer Perceptron------")
-#print("score précision :", score_precision)
+print("score précision :", score_precision)
 # Pour un score des scores d'apprentissages et de test ~ 0.26
 # On obtient un score de précision = 0.265 (avant optimisation via gridsearch)
 
-#vote_majoritaire()
+vote_majoritaire()
 
 # Test de la classification :
 print(data())
