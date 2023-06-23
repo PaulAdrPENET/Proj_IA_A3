@@ -63,7 +63,6 @@ class KNNFromScratch:
             distances = np.array(distances)
             # On tri le tableau pour placer le voisin le plus proche en début de liste
             idx_sorted = np.argsort(distances)
-            print(idx_sorted)
             # On récupère les indices des k voisins les plus proches
             # (dépend de la valeur voulue lors de l'instanciation)
             nearest_neighbor_idx = idx_sorted[:self.nb_neighbor]
@@ -81,7 +80,7 @@ x, y = repartition_data(data_ready)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=15)
 
 # Création et entraînement de l'instance KNNFromScratch
-knn = KNNFromScratch(nb_neighbor=5)
+knn = KNNFromScratch(nb_neighbor=10)
 knn.fit(x_train, y_train)
 
 # Prédiction sur l'ensemble de test
@@ -89,4 +88,4 @@ y_pred = knn.classification_knn(x_test)
 
 # Calcul de l'exactitude (accuracy)
 accuracy = accuracy_score(y_test, y_pred)
-print("Score_accuracy:", accuracy)
+print("Précision:", accuracy)

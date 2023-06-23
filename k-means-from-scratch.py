@@ -29,16 +29,16 @@ class KMeansFromScratch:
     # Fonction de calcul de distance : norme L1 (valeurs absolues)
     @staticmethod
     def dist_L1(coord1, coord2):
-        dlat_abs = abs(coord1['latitude'] - coord2['latitude'])
-        dlong_abs = abs(coord1['longitude'] - coord2['longitude'])
+        dlat_abs = abs(coord1[0] - coord2[0])
+        dlong_abs = abs(coord1[1] - coord2[1])
         distance = dlat_abs + dlong_abs
         return distance
 
     # Fonction de calcul de distance : norme L2 (euclidienne)
     @staticmethod
     def dist_L2(coord1, coord2):
-        dlat_squared = (coord1['latitude'] - coord2['latitude']) ** 2
-        dlong_squared = (coord1['longitude'] - coord2['longitude']) ** 2
+        dlat_squared = (coord1[0] - coord2[0]) ** 2
+        dlong_squared = (coord1[1] - coord2[1]) ** 2
         distance = sqrt(dlat_squared + dlong_squared)
         return distance
 
@@ -56,7 +56,7 @@ class KMeansFromScratch:
             distances = []
             for centroid in self.coord_centroids:
                 # Calcul de la distance entre l'accident et chaque centroïde
-                distances.append(self.haversine_distance(crash_coord[0], crash_coord[1], centroid[0], centroid[1]))
+                distances.append(self.dist_L2((crash_coord[0], crash_coord[1]), (centroid[0], centroid[1])))
             # Ajout à une liste de l'indice de la plus petite distance correspondant au centroid de l'accident
             self.list_of_assign.append(np.argmin(distances))
 
@@ -122,7 +122,7 @@ class KMeansFromScratch:
 
 
 # Instanciation de l'objet KMeansFromScratch
-kmeans = KMeansFromScratch(nb_of_clusters=14)
+kmeans = KMeansFromScratch(nb_of_clusters=9)
 # Utilisation de la méthode pour réaliser le clustering
 kmeans.k_means_from_scratch(data_ready)
 # Utilisation de la méthode pour afficher le clustering sur une carte

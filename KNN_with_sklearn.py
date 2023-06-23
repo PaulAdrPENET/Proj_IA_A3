@@ -10,7 +10,7 @@ x, y = repartition_data(data_ready)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=15)
 
 # Création d'une instance du classifieur KNN
-inst_knn = KNeighborsClassifier(n_neighbors=5)
+inst_knn = KNeighborsClassifier(n_neighbors=10)
 # Entrainement du modèle
 inst_knn.fit(x_train, y_train)
 # Test de prédiction

@@ -38,4 +38,4 @@ def aff_k_means_with_sklearn(nb_ofcentroid):
     fig.show()
 
 
-# aff_k_means_with_sklearn(5)
+aff_k_means_with_sklearn(8)
