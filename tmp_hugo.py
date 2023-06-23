@@ -134,30 +134,3 @@ def Davies_Bouldin():
 
 #Évaluation quantitative des résultats « supervisé » :
 #calcul taux d'apprentissage
-def taux_apprentissage():
-    taux_apprentissage = accuracy_score(y_test, y_pred)
-    print("Taux d'apprentissage : {:.2f}%".format(taux_apprentissage * 100))
-
-def Matrice_de_confusion():
-    matrice_confusion = confusion_matrix(y_test, y_pred)
-    print("Matrice de confusion :")
-    print(matrice_confusion)
-
-def precision_rappel():
-    precision = precision_score(y_test, y_pred)
-    rappel = recall_score(y_test, y_pred)
-
-    print("Précision : {:.2f}".format(precision))
-    print("Rappel : {:.2f}".format(rappel))
-
-def Courbe_ROC():
-    fpr, tpr, seuils = roc_curve(y_test, scores)# score correspond au score de précision du model
-    #fpr : taux de faux positif
-    #tpr : taux de vrais positif
-
-    #affichage du graph
-    plt.plot(fpr, tpr)
-    plt.xlabel('Taux de faux positifs')
-    plt.ylabel('Taux de vrais positifs')
-    plt.title('Courbe ROC')
-    plt.show()#
